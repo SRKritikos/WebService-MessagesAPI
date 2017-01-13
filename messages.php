@@ -3,7 +3,7 @@ include_once ('DBConnection.php');
 include_once ("MessagesDAO.php");
 $server="localhost";
 $username="root";
-$password="a";
+$password="";
 $database="messages";
 $dbconnection = new DBConnection($server, $username, $password, $database);
 $connection = $dbconnection->getConnection();
@@ -26,8 +26,10 @@ switch($_SERVER['REQUEST_METHOD']) {
 }
 
 
-if (!isset($_GET['id'])) {
-    echo $messagesDAO->getAllMessages();
+if (isset($_GET['id'])) {
+  echo $messagesDAO->getMessageById($_GET['id']);
+} else if (isset($_GET['fromId']) && isset($_GET['toId'])) {
+  echo $messagesDAO->getMessagesByIdRange($_GET['fromId'], $_GET['toId']);
 } else {
-    echo $messagesDAO->getMessageById($_GET['id']);
+  echo $messagesDAO->getAllMessages();
 }

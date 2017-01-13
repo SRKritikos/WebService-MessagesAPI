@@ -23,12 +23,24 @@ class MessagesDAO {
 
     function getAllMessages() {
         $rows = array();
-        if($result = $this->connection->query("SELECT messageData FROM messages")) {
-          while($row = $result->fetch_assoc()){
-            $rows[] = $row["messageData"];
-          }
+        $result = $this->connection->query("SELECT messageData FROM messages"); 
+        while($row = $result->fetch_assoc()){
+          $rows[] = $row["messageData"];
         }
         return json_encode($rows);
+    }
+    
+    function getMessagesByIdRange($from, $to) {
+      $rows = array();
+      $stmt = $this->connection->prepare("SELECT messageData FROM messages WHERE messageId BETWEEN ? AND ?");
+      $stmt->bind_param("ss", $from, $to);
+      $stmt->execute();
+      $stmt->bind_result($result);
+      while($stmt->fetch()) {
+        $rows[] = $result;
+      }
+      $stmt->close();
+      return json_encode($rows);
     }
 
 }

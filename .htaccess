@@ -3,3 +3,4 @@ RewriteEngine On
 RewriteRule ^messages$ messages.php  [L]
 RewriteRule ^messages/$ messages.php [L]
 RewriteRule ^messages/([0-9]+)$ messages.php?id=$1 [L]
+RewriteRule ^messages/([0-9]+):([0-9]+)$ messages.php?fromId=$1&toId=$2

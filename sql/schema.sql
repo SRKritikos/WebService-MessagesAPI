@@ -19,4 +19,7 @@ CREATE TABLE messages
 
 
 INSERT INTO messages VALUES(null, 'message1'),
-                           (null, 'message2');
+                           (null, 'message2'),
+                           (null, 'message3'),
+                           (null, 'message4'),
+                           (null, 'message5');
