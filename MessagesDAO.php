@@ -43,4 +43,21 @@ class MessagesDAO {
       return json_encode($rows);
     }
 
+    function updateMessage($id, $message) {
+        $stmt = $this->connection->prepare("UPDATE messages SET messageData=? WHERE messageId=?");
+        $stmt->bind_param("ss", $message,$id );
+        $stmt->execute();
+        $success = $stmt->affected_rows;
+        $stmt->close();
+        return $success > 0;
+    }
+    
+    function insertMessage($id, $message) {
+        $stmt = $this->connection->prepare("INSERT INTO messages (messageId, messageData) VALUES (?, ?)");
+        $stmt->bind_param("ss", $id, $message);
+        $stmt->execute();
+        $sucess = $stmt->affected_rows;
+        $stmt->close();
+        return $sucess > 0;
+    }
 }
