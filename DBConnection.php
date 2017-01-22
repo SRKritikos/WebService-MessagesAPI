@@ -1,7 +1,9 @@
 <?php
 
 class DBConnection {
+
   private $connection;
+
   function __construct($server, $username, $password, $database) {
     $this->connection = new mysqli($server, $username, $password, $database);
     if ($this->connection->errno) {
@@ -9,8 +11,9 @@ class DBConnection {
       throw new Exception($message);
     }
   }
-  
+
   function getConnection() {
     return $this->connection;
   }
+
 }
