@@ -41,8 +41,7 @@ function handleGetRequest($messagesService) {
 function handlePutRequest($messagesService) {
   if (isset($_GET['id'])) {
     $id = $_GET['id'];
-    $input = file_get_contents("php://input");
-    $input = urldecode($input);
+    $input = urldecode( file_get_contents("php://input") );
     $message = json_decode($input, true);
     $serverResponse = $messagesService->updateOrInsertMessage($id, $message['message']);
     if ($serverResponse != 404) {
