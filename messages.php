@@ -3,6 +3,7 @@
 include_once ('DBConnection.php');
 include_once ("MessagesDAO.php");
 include_once ("MessagesService.php");
+include_once ("APIResponse.php");
 $server = "localhost";
 $username = "root";
 $password = "";
@@ -18,7 +19,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     handleGetRequest($messagesService);
     break;
   case 'POST':
-    echo "POST REQUEST";
+    handlePostRequest($messagesService);
     break;
   case 'PUT':
     handlePutRequest($messagesService);
@@ -29,13 +30,16 @@ switch ($_SERVER['REQUEST_METHOD']) {
 }
 
 function handleGetRequest($messagesService) {
+  $response;
   if (isset($_GET['id'])) {
-    echo $messagesService->getMessageById($_GET['id']);
+    $response = $messagesService->getMessageById($_GET['id']);
   } else if (isset($_GET['fromId']) && isset($_GET['toId'])) {
     echo $messagesService->getMessagesByIdRange($_GET['fromId'], $_GET['toId']);
   } else {
-    echo $messagesService->getAllMessages();
+    $response = $messagesService->getAllMessages();
   }
+  http_response_code($response->getStatus());
+  echo json_encode($response);
 }
 
 function handlePutRequest($messagesService) {
@@ -43,9 +47,18 @@ function handlePutRequest($messagesService) {
     $id = $_GET['id'];
     $input = urldecode( file_get_contents("php://input") );
     $message = json_decode($input, true);
-    $serverResponse = $messagesService->updateOrInsertMessage($id, $message['message']);
-    if ($serverResponse != 404) {
-      echo "status:".$serverResponse." ".$_SERVER['REQUEST_URI'];
-    }
+    $response = $messagesService->updateOrInsertMessage($id, $message['message']);
+    header("Location: ".$_SERVER['REQUEST_URI']);
+    http_response_code($response->getStatus()); 
   }
+}
+
+function handlePostRequest($messagesService) {
+    $input = urldecode( file_get_contents("php://input") );
+    $message = json_decode($input, true);
+    $response = $messagesService->insertMessage($message['message']);
+    if ($response->getStatus() == 201) {
+      header("Location: ".$_SERVER['REQUEST_URI']."/".$response->getData());
+    }
+    http_response_code($response->getStatus());
 }

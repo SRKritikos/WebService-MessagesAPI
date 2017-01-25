@@ -9,54 +9,59 @@ class MessagesDAO {
   }
 
   function getMessageById($id) {
-    $result;
+    $message;
     $stmt = $this->connection->prepare("SELECT messageData FROM messages WHERE messageId=?");
     $stmt->bind_param("s", $id);
     $stmt->execute();
-    $stmt->bind_result($result);
+    $stmt->bind_result($message);
     $stmt->fetch();
     $stmt->close();
-    return json_encode($result);
+    return json_encode($message);
   }
 
   function getAllMessages() {
-    $rows = array();
+    $messages = array();
     $result = $this->connection->query("SELECT messageData FROM messages");
     while ($row = $result->fetch_assoc()) {
-      $rows[] = $row["messageData"];
+      $messages[] = $row["messageData"];
     }
-    return json_encode($rows);
+    return json_encode($messages);
   }
 
   function getMessagesByIdRange($from, $to) {
-    $rows = array();
+    $messages = array();
     $stmt = $this->connection->prepare("SELECT messageData FROM messages WHERE messageId BETWEEN ? AND ?");
     $stmt->bind_param("ss", $from, $to);
     $stmt->execute();
     $stmt->bind_result($result);
     while ($stmt->fetch()) {
-      $rows[] = $result;
+      $messages[] = $result;
     }
     $stmt->close();
-    return json_encode($rows);
+    return json_encode($messages);
   }
 
   function updateMessage($id, $message) {
     $stmt = $this->connection->prepare("UPDATE messages SET messageData=? WHERE messageId=?");
     $stmt->bind_param("ss", $message, $id);
     $stmt->execute();
-    $success = $stmt->affected_rows;
+    $totalAffected = $stmt->affected_rows;
     $stmt->close();
-    return $success > 0;
+    return $totalAffected > -1;
   }
 
   function insertMessage($id, $message) {
     $stmt = $this->connection->prepare("INSERT INTO messages (messageId, messageData) VALUES (?, ?)");
     $stmt->bind_param("ss", $id, $message);
     $stmt->execute();
-    $sucess = $stmt->affected_rows;
+    $totalAffected = $stmt->affected_rows;
     $stmt->close();
-    return $sucess > 0;
+    return $totalAffected > 0;
   }
 
+  function getMaxId() {
+    $result = $this->connection->query("SELECT MAX(messageId) as 'maxid' FROM messages");
+    $row = $result->fetch_assoc();
+    return $row["maxid"];
+  }
 }
