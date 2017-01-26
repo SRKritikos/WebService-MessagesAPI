@@ -12,38 +12,39 @@
  * @author srostantkritikos06
  */
 class APIResponse {
+
   public $status;
   public $resourceType;
   public $data;
 
   function __construct($status, $resourceType, $data) {
-      $this->status = $status;
-      $this->resourceType = $resourceType;
-      $this->data = $data;
+    $this->status = $status;
+    $this->resourceType = $resourceType;
+    $this->data = $data;
   }
 
-
   function getStatus() {
-      return $this->status;
+    return $this->status;
   }
 
   function setStatus($status) {
-      $this->status = $status;
+    $this->status = $status;
   }
 
   function getResourceType() {
-      return $this->resourceType;
+    return $this->resourceType;
   }
 
   function setResourceType($resourceType) {
-      $this->resourceType = $resourceType;
+    $this->resourceType = $resourceType;
   }
 
   function getData() {
-      return $this->data;
+    return $this->data;
   }
 
   function setData($data) {
-      $this->data = $data;
+    $this->data = $data;
   }
+
 }

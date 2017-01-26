@@ -1,5 +1,6 @@
 <?php
 
+include_once ('model/Message.php');
 class MessagesDAO {
 
   private $connection;
@@ -9,36 +10,52 @@ class MessagesDAO {
   }
 
   function getMessageById($id) {
+    $id;
     $message;
-    $stmt = $this->connection->prepare("SELECT messageData FROM messages WHERE messageId=?");
+    $stmt = $this->connection->prepare("SELECT messageId, messageData FROM messages WHERE messageId=?");
     $stmt->bind_param("s", $id);
     $stmt->execute();
-    $stmt->bind_result($message);
-    $stmt->fetch();
+    $stmt->bind_result($id, $message);
+    $isSuccessful = $stmt->fetch();
     $stmt->close();
-    return json_encode($message);
+    if ($isSuccessful) {
+      return new Message($id, $message);
+    } else {
+      return null;
+    }
   }
 
   function getAllMessages() {
     $messages = array();
-    $result = $this->connection->query("SELECT messageData FROM messages");
+    $result = $this->connection->query("SELECT messageId, messageData FROM messages");
     while ($row = $result->fetch_assoc()) {
-      $messages[] = $row["messageData"];
+      $messages[] = new Message($row['messageId'], $row["messageData"]);
     }
-    return json_encode($messages);
+    if ($result) {
+      return $messages;
+    } else {
+      return null;
+    }
   }
 
   function getMessagesByIdRange($from, $to) {
+    $id;
+    $message;
     $messages = array();
-    $stmt = $this->connection->prepare("SELECT messageData FROM messages WHERE messageId BETWEEN ? AND ?");
+    $stmt = $this->connection->prepare("SELECT messageId, messageData FROM messages WHERE messageId BETWEEN ? AND ?");
     $stmt->bind_param("ss", $from, $to);
     $stmt->execute();
-    $stmt->bind_result($result);
+    $isSuccessful = $stmt->bind_result($id, $message);
     while ($stmt->fetch()) {
-      $messages[] = $result;
+      $messages[] = new Message($id, $message);
     }
     $stmt->close();
-    return json_encode($messages);
+    if ($isSuccessful) {
+      return $messages;
+    } else {
+      return null;
+    }
+    
   }
 
   function updateMessage($id, $message) {
@@ -47,7 +64,7 @@ class MessagesDAO {
     $stmt->execute();
     $totalAffected = $stmt->affected_rows;
     $stmt->close();
-    return $totalAffected > -1;
+    return $totalAffected > 0;
   }
 
   function insertMessage($id, $message) {
@@ -59,9 +76,19 @@ class MessagesDAO {
     return $totalAffected > 0;
   }
 
+  function deleteMessageById($id) {
+    $stmt = $this->connection->prepare("DELETE FROM messages WHERE messageId = ?");
+    $stmt->bind_param("s", $id);
+    $stmt->execute();
+    $totalAffected = $stmt->affected_rows;
+    $stmt->close();
+    return $totalAffected;
+  }
+
   function getMaxId() {
     $result = $this->connection->query("SELECT MAX(messageId) as 'maxid' FROM messages");
     $row = $result->fetch_assoc();
     return $row["maxid"];
   }
+
 }
