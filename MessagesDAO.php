@@ -1,12 +1,14 @@
 <?php
 
-include_once ('model/Message.php');
+include_once ('model/MessageFactory.php');
 class MessagesDAO {
 
   private $connection;
+  private $messageFactory;
 
-  function __construct($connection) {
+  function __construct($connection, $messageFactory) {
     $this->connection = $connection;
+    $this->messageFactory = $messageFactory;
   }
 
   function getMessageById($id) {
@@ -19,7 +21,7 @@ class MessagesDAO {
     $isSuccessful = $stmt->fetch();
     $stmt->close();
     if ($isSuccessful) {
-      return new Message($id, $message);
+      return $this->messageFactory->create($id, $message);
     } else {
       return null;
     }
@@ -29,7 +31,7 @@ class MessagesDAO {
     $messages = array();
     $result = $this->connection->query("SELECT messageId, messageData FROM messages");
     while ($row = $result->fetch_assoc()) {
-      $messages[] = new Message($row['messageId'], $row["messageData"]);
+      $messages[] = $this->messageFactory->create($row['messageId'], $row["messageData"]);
     }
     if ($result) {
       return $messages;
@@ -47,7 +49,7 @@ class MessagesDAO {
     $stmt->execute();
     $isSuccessful = $stmt->bind_result($id, $message);
     while ($stmt->fetch()) {
-      $messages[] = new Message($id, $message);
+      $messages[] = $this->messageFactory->create($id, $message);
     }
     $stmt->close();
     if ($isSuccessful) {
@@ -55,7 +57,6 @@ class MessagesDAO {
     } else {
       return null;
     }
-    
   }
 
   function updateMessage($id, $message) {

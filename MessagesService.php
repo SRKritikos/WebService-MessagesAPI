@@ -1,14 +1,16 @@
 <?php
 
 include_once ('MessagesDAO.php');
-include_once ('model/APIResponse.php');
+include_once ('model/APIResponseFactory.php');
 
 class MessagesService {
 
   private $messagesDAO;
+  private $ApiResponseFactory;
 
-  function __construct($messagesDAO) {
+  function __construct($messagesDAO, $ApiResponseFactory) {
     $this->messagesDAO = $messagesDAO;
+    $this->ApiResponseFactory = $ApiResponseFactory;
   }
 
   function updateOrInsertMessage($id, $message) {
@@ -21,7 +23,7 @@ class MessagesService {
       $this->messagesDAO->updateMessage($id, $message);
       $status = "204";
     }
-    return new APIResponse($status, "", "");
+    return $this->ApiResponseFactory->create($status, "", "");
   }
 
   function getAllMessages() {
@@ -35,7 +37,7 @@ class MessagesService {
       $status = "404";
       $resourceType = "";
     }
-    return new APIResponse($status, $resourceType, $data);
+    return $this->ApiResponseFactory->create($status, $resourceType, $data);
   }
 
   function getMessageById($id) {
@@ -49,7 +51,7 @@ class MessagesService {
       $status = "404";
       $resourceType = "";
     }
-    return new APIResponse($status, $resourceType, $data);
+    return $this->ApiResponseFactory->create($status, $resourceType, $data);
   }
 
   function insertMessage($message) {
@@ -62,7 +64,7 @@ class MessagesService {
     } else {
       $status = "409";
     }
-    return new APIResponse($status, "", $id);
+    return $this->ApiResponseFactory->create($status, "", $id);
   }
 
   function deleteMessage($id) {
@@ -73,7 +75,7 @@ class MessagesService {
     } else {
       $status = 404;
     }
-    return new APIResponse($status, "", "");
+    return $this->ApiResponseFactory->create($status, "", "");
   }
 
 }

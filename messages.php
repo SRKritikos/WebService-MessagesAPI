@@ -3,15 +3,19 @@
 include_once ('DBConnection.php');
 include_once ("MessagesDAO.php");
 include_once ("MessagesService.php");
-include_once ("model/APIResponse.php");
+include_once ("model/APIResponseFactory.php");
+include_once ("model/MessageFactory.php");
+
 $server = "localhost";
 $username = "root";
-$password = "";
+$password = "mysql";
 $database = "messages";
+$ApiResponseFactory = new APIResponseFactory();
+$messageFactory = new MessageFactory();
 $dbconnection = new DBConnection($server, $username, $password, $database);
 $connection = $dbconnection->getConnection();
-$messagesDAO = new MessagesDAO($connection);
-$messagesService = new MessagesService($messagesDAO);
+$messagesDAO = new MessagesDAO($connection, $messageFactory);
+$messagesService = new MessagesService($messagesDAO, $ApiResponseFactory);
 
 
 switch ($_SERVER['REQUEST_METHOD']) {
@@ -28,7 +32,7 @@ switch ($_SERVER['REQUEST_METHOD']) {
     handleDeleteRequest($messagesService);
     break;
   default:
-    http_response_code(404);
+    http_response_code(501);
     break;
 }
 
@@ -37,7 +41,7 @@ function handleGetRequest($messagesService) {
   if (isset($_GET['id'])) {
     $response = $messagesService->getMessageById($_GET['id']);
   } else if (isset($_GET['fromId']) && isset($_GET['toId'])) {
-    echo $messagesService->getMessagesByIdRange($_GET['fromId'], $_GET['toId']);
+    $response = $messagesService->getMessagesByIdRange($_GET['fromId'], $_GET['toId']);
   } else {
     $response = $messagesService->getAllMessages();
   }
@@ -62,7 +66,7 @@ function handlePostRequest($messagesService) {
   $message = json_decode($input, true);
   $response = $messagesService->insertMessage($message['message']);
   if ($response->getStatus() == 201) {
-    header("Location: " . $_SERVER['REQUEST_URI'] . $response->getData());
+    header("Location: " . $_SERVER['REQUEST_URI'] . "/" . $response->getData());
   }
   http_response_code($response->getStatus());
 }
